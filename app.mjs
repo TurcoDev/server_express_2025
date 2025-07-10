@@ -1,6 +1,17 @@
 import mysql from "mysql2/promise";
 import express from "express";
+import cors from "cors";
 const app = express();
+
+// Permitir todos los orígenes (solo para desarrollo)
+app.use(cors());
+
+// O configurar CORS específicamente
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:3000', 'null'], // null para archivos locales
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 let connection;
 
@@ -38,7 +49,7 @@ app.get("/users", async (req, res) => {
 
 app.post("/users", async (req, res) => {
   const newUser = req.body;
-  // newUser.id = users.length + 1;
+  // newUser.id = 100;
   // users.push(newUser);
   if (!connection) {
     return res.status(500).json({ error: "Database connection not established" });
