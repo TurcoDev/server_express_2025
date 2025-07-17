@@ -1,0 +1,21 @@
+# GET http://localhost:3000/users
+
+# POST http://localhost:3000/users
+# Content-Type: application/json
+
+# {
+#     "username": "john_doe",
+#     "role": "admin",
+#     "created_at": "2025-07-05 18:37:13"
+# }
+
+# PUT http://localhost:3000/users/1
+# Content-Type: application/json
+
+# {
+#     "username": "juancho_updated2",
+#     "role": "user",
+#     "created_at": "2025-07-05 18:37:13"
+# }
+
+# DELETE http://localhost:3000/users/13

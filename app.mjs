@@ -46,14 +46,15 @@ app.post("/users", async (req, res) => {
 });
 
 // Actualizar un usuario por ID
-app.put("/users", async (req, res) => {
+app.put("/users/:id", async (req, res) => {
+  const userId = parseInt(req.params.id);
   const updatedUser = req.body;
   // Actualizar el usuario en la base de datos
-  if (!updatedUser || !updatedUser.id) {
+  if (!updatedUser || !userId) {
     return res.status(400).json({ error: "Invalid user data" });
   }
 
-  const [result] = await connection.execute(`UPDATE \`users\` SET username = ?, role = ?, created_at = ? WHERE id = ?`, [updatedUser.username, updatedUser.role, updatedUser.created_at, updatedUser.id]);
+  const [result] = await connection.execute(`UPDATE \`users\` SET username = ?, role = ?, created_at = ? WHERE id = ?`, [updatedUser.username, updatedUser.role, updatedUser.created_at, userId]);
   if (result.affectedRows > 0) {
     res.status(200).json(updatedUser);
   } else {
@@ -70,10 +71,13 @@ app.delete("/users/:id", async (req, res) => {
   }
 
   const [result] = await connection.execute(`DELETE FROM \`users\` WHERE id = ?`, [userId]);
+  if (result.affectedRows <= 0) {
+    return res.status(404).json({ error: "User not found" });
+  }
   if (result.affectedRows > 0) {
-    res.status(204).end();
+    return res.status(200).end();
   } else {
-    res.status(404).json({ error: "User not found" });
+    return res.status(404).json({ error: "User not found" });
   }
 });
 
