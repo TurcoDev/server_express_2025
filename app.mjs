@@ -17,12 +17,13 @@ app.use(cors({
 // Middleware para parsear JSON
 app.use(express.json());
 
-// arreglo que será reemplazado por la base de datos
+// arreglo que es reemplazado por la base de datos
 let users = [
   { id: 1, name: "Juan" },
   { id: 2, name: "María" },
 ];
 
+// Obtener todos los usuarios
 app.get("/users", async (req, res) => {
   if (!connection) {
     return res.status(500).json({ error: "Database connection not established" });
@@ -31,6 +32,7 @@ app.get("/users", async (req, res) => {
   res.status(200).json(results);
 });
 
+// Obtener un usuario por ID
 app.post("/users", async (req, res) => {
   const newUser = req.body;
   // newUser.id = 100;
@@ -43,34 +45,44 @@ app.post("/users", async (req, res) => {
   res.status(201).json(result);
 });
 
-app.put("/users", (req, res) => {
+// Actualizar un usuario por ID
+app.put("/users", async (req, res) => {
   const updatedUser = req.body;
-  const index = users.findIndex((user) => user.id === updatedUser.id);
+  // Actualizar el usuario en la base de datos
+  if (!updatedUser || !updatedUser.id) {
+    return res.status(400).json({ error: "Invalid user data" });
+  }
 
-  if (index !== -1) {
-    users[index] = updatedUser;
+  const [result] = await connection.execute(`UPDATE \`users\` SET username = ?, role = ?, created_at = ? WHERE id = ?`, [updatedUser.username, updatedUser.role, updatedUser.created_at, updatedUser.id]);
+  if (result.affectedRows > 0) {
     res.status(200).json(updatedUser);
   } else {
     res.status(404).json({ error: "User not found" });
   }
 });
 
-app.delete("/users/:id", (req, res) => {
+// Eliminar un usuario por ID
+app.delete("/users/:id", async (req, res) => {
   const userId = parseInt(req.params.id);
-  const index = users.findIndex((user) => user.id === userId);
 
-  if (index !== -1) {
-    users.splice(index, 1);
+  if (!userId) {
+    return res.status(400).json({ error: "Invalid user ID" });
+  }
+
+  const [result] = await connection.execute(`DELETE FROM \`users\` WHERE id = ?`, [userId]);
+  if (result.affectedRows > 0) {
     res.status(204).end();
   } else {
     res.status(404).json({ error: "User not found" });
   }
 });
 
+// Ruta de prueba
 app.get("/", (req, res) => {
   res.status(200).send("Hello World!\n");
 });
 
+// Iniciar el servidor
 app.listen(3000, "127.0.0.1", () => {
   console.log("Server is running on http://127.0.0.1:3000");
 });
