@@ -1,8 +1,9 @@
-import mysql from "mysql2/promise";
+import { initDB } from "./connectDB.mjs";
 import express from "express";
 import cors from "cors";
 const app = express();
 
+const connection = await initDB();
 // Permitir todos los orígenes (solo para desarrollo)
 app.use(cors());
 
@@ -13,27 +14,10 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-let connection;
-
-try {
-  // Create a MySQL connection
-  connection = await mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "1234", // replace with your MySQL password
-    database: "followers",
-  });
-  console.log("Connected to the database successfully! 👍");
-  const [results, fields] = await connection.execute("SELECT * FROM `users`");
-  console.log("Users in the database:", results);
-  console.log("Database fields:", fields);
-  
-} catch (error) {
-  console.error("Error connecting to the database:", error);
-}
-
+// Middleware para parsear JSON
 app.use(express.json());
 
+// arreglo que será reemplazado por la base de datos
 let users = [
   { id: 1, name: "Juan" },
   { id: 2, name: "María" },
@@ -88,5 +72,5 @@ app.get("/", (req, res) => {
 });
 
 app.listen(3000, "127.0.0.1", () => {
-  console.log("Listening on 127.0.0.1:3000");
+  console.log("Server is running on http://127.0.0.1:3000");
 });
